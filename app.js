@@ -25,10 +25,6 @@ async function loadTasks() {
   }
 }
 
-function weatherText(w) {
-  return w ? w.tempMax + '℃ · ' + w.windMax + 'm/s · ' + w.rainProb + '%' : '-';
-}
-
 function renderTasks() {
   const body = document.getElementById('taskList');
   body.innerHTML = '';
@@ -71,12 +67,28 @@ async function addTask(e) {
   renderTasks();
 }
 
-// PC 시간 기준 오늘 날짜 (toISOString 은 UTC 라 오전 9시 전엔 어제가 나옴)
-function showToday() {
+// PC 시간 기준 오늘 날짜 YYYY-MM-DD (toISOString 은 UTC 라 오전 9시 전엔 어제가 나옴)
+function todayStr() {
   const d = new Date();
   const pad = n => String(n).padStart(2, '0');
-  document.getElementById('todayDate').textContent =
-    d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+}
+
+function showToday() {
+  document.getElementById('todayDate').textContent = todayStr();
+}
+
+// 04 단원 : 지금 표를 마크다운으로 만들어 '현장일정_판단_YYYY-MM-DD.md' 로 내려받기
+function downloadJudge() {
+  const date = todayStr();
+  const testNote = location.search.includes('test=wind') ? '시험 모드: 풍속 12 m/s (실제 날씨 아님)' : '';
+  const md = buildJudgeMarkdown(tasks, weatherByRegion, date, testNote);
+  const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '현장일정_판단_' + date + '.md';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
 // 03 단원 : 지역별 오늘 날씨를 받아 표를 다시 그림 (실패해도 목록은 그대로)
@@ -97,6 +109,7 @@ async function loadWeather() {
 }
 
 document.getElementById('taskForm').addEventListener('submit', addTask);
+document.getElementById('mdBtn').addEventListener('click', downloadJudge);
 showToday();
 loadTasks().then(renderTasks);
 loadWeather();

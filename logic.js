@@ -55,4 +55,25 @@ function applyTestMode(weather, search) {
   return result;
 }
 
-if (typeof module !== 'undefined') module.exports = { RULES, judge, REGIONS, buildWeatherUrl, parseWeather, applyTestMode };
+// 날씨 칸 글자 (화면 표와 md 파일이 같이 씀)
+function weatherText(w) {
+  return w ? w.tempMax + '℃ · ' + w.windMax + 'm/s · ' + w.rainProb + '%' : '-';
+}
+
+// 오늘 판단을 마크다운 글로 만듦 (표 + 맨 아래 판단 기준 한 줄)
+function buildJudgeMarkdown(tasks, weather, date, testNote) {
+  const cell = v => String(v).replace(/\|/g, '\\|').replace(/[\r\n]+/g, ' ');   // 입력 글자의 | · 줄바꿈이 표를 깨지 않게
+  const lines = ['# 현장 일정 판단 (' + date + ')', ''];
+  if (testNote) lines.push('> ' + testNote, '');
+  lines.push('| 일정 | 지역 | 구분 | 담당 | 날씨 | 판단 |', '|---|---|---|---|---|---|');
+  for (const t of tasks) {
+    const w = weather[t.region];
+    const row = [t.title, t.region, t.kind, t.owner, weatherText(w), judge(t.kind, w).text];
+    lines.push('| ' + row.map(cell).join(' | ') + ' |');
+  }
+  lines.push('', '판단 기준: 고소 일정 최대 풍속 ' + RULES.wind + ' m/s 이상 \'중지 검토\' · 강수확률 '
+    + RULES.rain + '% 이상 \'우천 주의\' · 최고 기온 ' + RULES.heat + '℃ 이상 \'폭염 휴식\' (교육용 가상 기준)');
+  return lines.join('\n') + '\n';
+}
+
+if (typeof module !== 'undefined') module.exports = { RULES, judge, REGIONS, buildWeatherUrl, parseWeather, applyTestMode, weatherText, buildJudgeMarkdown };
