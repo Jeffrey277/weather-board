@@ -15,3 +15,5 @@ button { background: #dbf954; color: #fff; border: 0; border-radius: 4px; cursor
 .stop { color: #c62828; font-weight: bold; }
 .none { color: #888; }
 #msgBox { color: #b6b1b1; min-height: 1em; }
+#loadMsg { color: #c62828; font-weight: bold; margin: 0 0 8px; }
+#loadMsg:empty { display: none; }

@@ -6,13 +6,15 @@
 
 ## 기술 스택 (변경 금지)
 - HTML + CSS + 순수 JavaScript만 사용한다. (React 등 프레임워크, 빌드 도구 사용 금지)
-- index.html 을 더블클릭해서 열 수 있어야 한다.
+- 03 단원까지는 index.html 을 더블클릭해서 열 수 있어야 한다.
+- 04 단원부터는 data/tasks.json 을 읽으므로 배포 주소나 로컬 서버(VS Code Live Server 등)로 연다. 더블클릭으로 열면 '배포 주소로 열어 주세요' 안내가 보여야 한다.
 
 ## 폴더 구조
 - index.html : 화면 구조
 - style.css  : 디자인
 - logic.js   : 판단 규칙만 (화면을 다루는 코드 금지)
 - app.js     : 화면 동작 (목록 그리기, 일정 추가)
+- data/tasks.json : 기본 일정 목록 (가상 데이터)
 - PRD.md · CLAUDE.md · README.md : 문서
 
 ## 작업 방식
@@ -22,5 +24,8 @@
 
 ## 보안 · 데이터 규칙
 - 가상 데이터만 사용한다. 실제 이름 · 연락처 · 기관 내부 자료를 넣지 않는다.
+- 기본 일정은 data/tasks.json 에만 둔다. 코드 안에 일정 목록을 다시 넣지 않는다.
+- 일정은 data/tasks.json 을 먼저 읽고, 브라우저 저장(localStorage 'wx_added')의 일정을 그 뒤에 붙인다.
+- 브라우저 저장에는 화면에서 추가한 일정만 둔다. 기본 일정을 복사해 넣지 않는다.
 - 사용자가 입력한 글자는 textContent 로 표시한다.
 - 비밀 키는 코드 · 채팅 · GitHub 에 넣지 않는다.
