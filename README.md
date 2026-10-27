@@ -12,7 +12,9 @@
 | index.html | 화면 구조 |
 | style.css | 디자인 |
 | logic.js | 판단 규칙 |
-| app.js | 화면 동작 |
+| app.js | 화면 동작 · Supabase 읽기 · 저장 |
+| config.js | Supabase 주소 · 공개용 키 |
+| setup.sql | wx_tasks 표 만들기 (SQL Editor 에서 실행) |
 | PRD.md | 무엇을 · 왜 만드는지 |
 | CLAUDE.md | AI가 지킬 작업 규칙 |
 | .gitignore | GitHub에 올리지 않을 파일 목록 |

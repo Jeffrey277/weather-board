@@ -3,19 +3,25 @@
 let tasks = [];
 let weatherByRegion = {};   // 03 단원에서 지역별 날씨를 넣음
 
-// 04 단원 : 기본 일정은 data/tasks.json 에서 먼저 읽고, 브라우저 저장(wx_added)의 추가 일정을 뒤에 붙임
-// 더블클릭(file://)으로 열면 브라우저가 JSON 읽기를 막으므로 안내 문구를 띄움
+// 04 단원 DB : 일정은 Supabase 표 wx_tasks 에서 읽고 추가함 (연결 정보는 config.js)
+let db = null;
+try {
+  db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+} catch (err) {
+  db = null;   // config.js 가 비었거나 supabase-js 를 못 받음 → loadTasks 에서 안내
+}
+
 async function loadTasks() {
-  const saved = JSON.parse(localStorage.getItem('wx_added') || '[]');
   const msg = document.getElementById('loadMsg');
   try {
-    const res = await fetch('data/tasks.json');
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    tasks = (await res.json()).concat(saved);
+    if (!db) throw new Error('no client');
+    const { data, error } = await db.from('wx_tasks').select('title, region, kind, owner').order('id');
+    if (error) throw error;
+    tasks = data;
     msg.textContent = '';
   } catch (err) {
-    tasks = saved;
-    msg.textContent = '일정 파일(data/tasks.json)을 읽지 못했습니다. 배포 주소로 열어 주세요.';
+    tasks = [];
+    msg.textContent = '일정 DB에 연결하지 못했습니다. config.js 의 주소 · 공개용 키와 setup.sql 실행 여부를 확인해 주세요.';
   }
 }
 
@@ -43,8 +49,10 @@ function renderTasks() {
   }
 }
 
-function addTask(e) {
+async function addTask(e) {
   e.preventDefault();
+  const form = e.target;
+  const msg = document.getElementById('msgBox');
   const t = {
     title: document.getElementById('titleInput').value.trim(),
     region: document.getElementById('regionInput').value,
@@ -52,11 +60,14 @@ function addTask(e) {
     owner: document.getElementById('ownerInput').value.trim(),
   };
   if (!t.title || !t.owner) return;
-  const saved = JSON.parse(localStorage.getItem('wx_added') || '[]');
-  saved.push(t);
-  localStorage.setItem('wx_added', JSON.stringify(saved));   // 화면에서 추가한 일정만 저장
-  e.target.reset();
-  tasks.push(t);
+  const { error } = db ? await db.from('wx_tasks').insert(t) : { error: 'no client' };
+  if (error) {
+    msg.textContent = '저장하지 못했습니다. 연결 상태와 지역 · 구분 값을 확인해 주세요.';
+    return;
+  }
+  msg.textContent = '저장했습니다.';
+  form.reset();
+  await loadTasks();
   renderTasks();
 }
 
